@@ -1,0 +1,54 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+<form id="leakForm" method="post">
+    <button type="submit" name="leak" value="1" class="btn btn-danger">Crash App (Memory Leak)</button>
+    <button type="submit" name="slowleak" value="1" class="btn btn-warning">Slow Memory Leak (20 min)</button>
+    <button type="submit" name="cpu" value="1" class="btn btn-danger">Ramp Up CPU (20s)</button>
+</form>
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+@section Scripts {
+    <script>
+        function showToast(message) {
+            var toast = document.createElement('div');
+            toast.innerText = message;
+            toast.style.background = '#333';
+            toast.style.color = '#fff';
+            toast.style.padding = '12px 24px';
+            toast.style.marginTop = '8px';
+            toast.style.borderRadius = '4px';
+            toast.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            toast.style.opacity = '0.95';
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(function() { toast.remove(); }, 3500);
+        }
+        document.getElementById('leakForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var form = e.target;
+            var formData = new FormData(form);
+            var btn = document.activeElement;
+            if (btn && btn.name) {
+                formData.set(btn.name, btn.value);
+            }
+            fetch(form.action || window.location.pathname, {
+                method: 'POST',
+                body: formData
+            }).then(function(response) {
+                if (response.ok) {
+                    showToast('Your request has been actioned');
+                } else {
+                    showToast('There was an error processing your request');
+                }
+            }).catch(function() {
+                showToast('There was an error processing your request');
+            });
+        });
+    </script>
+}
